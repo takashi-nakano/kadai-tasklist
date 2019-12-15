@@ -15,6 +15,8 @@
             </c:forEach>
         </ul>
 
+        <p><a href="${pageContext.request.contextPath}/new" >新規作成</a></p>
+
 
 
     </c:param>
