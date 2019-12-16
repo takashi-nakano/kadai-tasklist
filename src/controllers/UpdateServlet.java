@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.Timestamp;
 
 import javax.persistence.EntityManager;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -31,37 +32,49 @@ public class UpdateServlet extends HttpServlet {
     /**
      * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
      */
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String _token =(String)request.getParameter("_token");
-        if(_token != null && _token.equals(request.getSession().getId())){
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String _token = (String) request.getParameter("_token");
+        if (_token != null && _token.equals(request.getSession().getId())) {
             EntityManager em = DBUtil.createEntityManager();
 
             //セッションスコープからタスクのIDを取得して
             //該当のIDのタスクをDBから取得
-            Tasks t =em.find(Tasks.class, (Integer)(request.getSession().getAttribute("tasks_id")));
+            Tasks t = em.find(Tasks.class, (Integer) (request.getSession().getAttribute("tasks_id")));
 
             //各プロパティに上書き
             String content = request.getParameter("content");
             t.setContent(content);
 
-            Timestamp currentTime = new Timestamp(System.currentTimeMillis());
-            t.setUpdated_at(currentTime);
+            if (content == null || content.equals("")) {
+                String error = "タスクを入力してください。";
+                request.setAttribute("_token", request.getSession().getId());
+                request.setAttribute("tasks", t);
+                request.setAttribute("error", error);
 
-            //データベースの更新
-            em.getTransaction().begin();
-            em.getTransaction().commit();
-            em.close();
+                RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/tasks/edit.jsp");
+                rd.forward(request, response);
 
-            //セッションスコープ上の不要なデータを削除
-            request.getSession().removeAttribute("tasks_id");
+            } else {
 
-            //indexページへリダイレクト
-            response.sendRedirect(request.getContextPath() + "/index");
+                Timestamp currentTime = new Timestamp(System.currentTimeMillis());
+                t.setUpdated_at(currentTime);
 
+                //データベースの更新
+                em.getTransaction().begin();
+                em.getTransaction().commit();
+                request.getSession().setAttribute("flush", "更新が完了しました。");
+                em.close();
+
+                //セッションスコープ上の不要なデータを削除
+                request.getSession().removeAttribute("tasks_id");
+
+                //indexページへリダイレクト
+                response.sendRedirect(request.getContextPath() + "/index");
+
+            }
 
         }
 
-
     }
-
 }
