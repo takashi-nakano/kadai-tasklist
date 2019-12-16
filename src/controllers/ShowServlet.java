@@ -31,17 +31,17 @@ public class ShowServlet extends HttpServlet {
     /**
      * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
      */
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         EntityManager em = DBUtil.createEntityManager();
 
         Tasks t = em.find(Tasks.class, Integer.parseInt(request.getParameter("id")));
         em.close();
 
-        request.setAttribute("tasks",t);
+        request.setAttribute("tasks", t);
 
         RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/tasks/show.jsp");
         rd.forward(request, response);
-
 
     }
 

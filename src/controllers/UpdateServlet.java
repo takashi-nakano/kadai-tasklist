@@ -38,14 +38,13 @@ public class UpdateServlet extends HttpServlet {
         if (_token != null && _token.equals(request.getSession().getId())) {
             EntityManager em = DBUtil.createEntityManager();
 
-            //セッションスコープからタスクのIDを取得して
-            //該当のIDのタスクをDBから取得
             Tasks t = em.find(Tasks.class, (Integer) (request.getSession().getAttribute("tasks_id")));
 
-            //各プロパティに上書き
             String content = request.getParameter("content");
             t.setContent(content);
 
+
+            //未入力の際はエラーを表示する
             if (content == null || content.equals("")) {
                 String error = "タスクを入力してください。";
                 request.setAttribute("_token", request.getSession().getId());
@@ -60,16 +59,13 @@ public class UpdateServlet extends HttpServlet {
                 Timestamp currentTime = new Timestamp(System.currentTimeMillis());
                 t.setUpdated_at(currentTime);
 
-                //データベースの更新
                 em.getTransaction().begin();
                 em.getTransaction().commit();
                 request.getSession().setAttribute("flush", "更新が完了しました。");
                 em.close();
 
-                //セッションスコープ上の不要なデータを削除
                 request.getSession().removeAttribute("tasks_id");
 
-                //indexページへリダイレクト
                 response.sendRedirect(request.getContextPath() + "/index");
 
             }

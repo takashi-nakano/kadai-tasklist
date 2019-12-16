@@ -42,7 +42,7 @@ public class CreateServlet extends HttpServlet {
 
             String content = request.getParameter("content");
             t.setContent(content);
-
+            //未入力の際はエラーを表示する
             if (content == null || content.equals("")) {
                 em.close();
 
